@@ -159,7 +159,7 @@ export default function App() {
 
       // 2. Open Razorpay Checkout Modal
       const options = {
-        key: 'rzp_test_STLcatTcBrF54V',
+        key: 'rzp_live_STSp9rTeNzt88z',
         amount: order.amount,
         currency: order.currency,
         name: "Powerhouse AI",

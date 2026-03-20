@@ -13,8 +13,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'dist')));
 
-const PUBLIC_KEY = 'rzp_test_STLcatTcBrF54V';
-const SECRET_KEY = '1x4mZi7pwsFtHOPcffsGRE4H';
+const PUBLIC_KEY = 'rzp_live_STSp9rTeNzt88z';
+const SECRET_KEY = 'BAHJkoLRIAp8UKpjOSclbVsg';
 
 const razorpay = new Razorpay({
   key_id: PUBLIC_KEY,

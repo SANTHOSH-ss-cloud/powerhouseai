@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(process.cwd(), 'dist')));
 
 const PUBLIC_KEY = 'rzp_test_STLcatTcBrF54V';
 const SECRET_KEY = '1x4mZi7pwsFtHOPcffsGRE4H';
@@ -64,7 +64,7 @@ app.post('/api/verify-payment', (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3001;

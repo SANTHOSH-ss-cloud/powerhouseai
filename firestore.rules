@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required, email format)
+    //   - displayName: string (optional)
+    //   - credits: number (required, >= 0)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: generations
+    // Document ID: {genId}
+    // Fields:
+    //   - userId: string (required)
+    //   - type: string (required, enum: ['ppt', 'pdf', 'word'])
+    //   - prompt: string (required)
+    //   - title: string (required)
+    //   - content: string (required)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'credits', 'createdAt']) &&
+             data.uid == request.auth.uid &&
+             data.email is string &&
+             data.credits is number && data.credits >= 0 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidGeneration(data) {
+      return data.keys().hasAll(['userId', 'type', 'prompt', 'title', 'content', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.type in ['ppt', 'pdf', 'word'] &&
+             data.prompt is string && data.prompt.size() < 5000 &&
+             data.title is string && data.title.size() < 200 &&
+             data.content is string &&
+             data.createdAt is timestamp;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "sssanthosh4393@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.credits == 5;
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /generations/{genId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && isValidGeneration(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+  }
+}

@@ -207,6 +207,10 @@ export default function App() {
   };
 
   const handleGenerate = async () => {
+    if (!user) {
+      handleLogin();
+      return;
+    }
     if (!profile || profile.credits <= 0) {
       alert("Not enough credits! Please contact support to buy more.");
       return;
@@ -287,37 +291,6 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full text-center"
-        >
-          <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-zinc-200">
-            <Sparkles className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 mb-4">Powerhouse AI</h1>
-          <p className="text-zinc-500 mb-10 text-lg">
-            The ultimate document generator for teachers and students. 
-            Create PPTs, PDFs, and Word docs in seconds.
-          </p>
-          <button 
-            onClick={handleLogin}
-            className="w-full py-4 px-6 bg-zinc-900 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all shadow-lg hover:shadow-xl active:scale-95"
-          >
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-6 h-6" alt="Google" />
-            Sign in with Google
-          </button>
-          <p className="mt-8 text-zinc-400 text-sm">
-            Teachers get 5 free credits to start.
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col md:flex-row">
@@ -332,38 +305,55 @@ export default function App() {
 
           <div className="flex-1 overflow-y-auto space-y-8">
             {/* User Info */}
-            <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-100">
-              <div className="flex items-center gap-3 mb-4">
-                <img src={user.photoURL || ''} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="Avatar" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate">{user.displayName}</p>
-                  <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+            {user ? (
+              <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <img src={user.photoURL || ''} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="Avatar" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate">{user.displayName}</p>
+                    <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between bg-white rounded-xl p-3 border border-zinc-100 shadow-sm mb-2">
+                  <div className="flex items-center gap-2">
+                    <Coins className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm font-medium">Credits</span>
+                  </div>
+                  <span className="text-lg font-bold">{profile?.credits || 0}</span>
+                </div>
+                <div className="flex gap-2 w-full">
+                  <button 
+                    onClick={() => handleBuyCredits(5, 50)}
+                    className="flex-1 py-2 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold hover:bg-amber-100 transition-colors border border-amber-100 flex flex-col items-center justify-center p-2"
+                  >
+                    <span className="flex items-center gap-1"><Plus className="w-3 h-3" /> 5 Credits</span>
+                    <span className="text-[10px] opacity-75 mt-0.5">₹50</span>
+                  </button>
+                  <button 
+                    onClick={() => handleBuyCredits(10, 100)}
+                    className="flex-1 py-2 bg-neutral-50 text-neutral-700 rounded-xl text-xs font-bold hover:bg-neutral-100 transition-colors border border-neutral-200 flex flex-col items-center justify-center p-2 shadow-sm"
+                  >
+                    <span className="flex items-center gap-1"><Plus className="w-3 h-3" /> 10 Credits</span>
+                    <span className="text-[10px] opacity-75 mt-0.5">₹100</span>
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center justify-between bg-white rounded-xl p-3 border border-zinc-100 shadow-sm mb-2">
-                <div className="flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-amber-500" />
-                  <span className="text-sm font-medium">Credits</span>
+            ) : (
+              <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100 text-center shadow-sm">
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm border border-zinc-100">
+                  <Sparkles className="w-6 h-6 text-zinc-900" />
                 </div>
-                <span className="text-lg font-bold">{profile?.credits || 0}</span>
-              </div>
-              <div className="flex gap-2 w-full">
+                <h3 className="font-bold text-zinc-900 mb-1">Create an account</h3>
+                <p className="text-xs text-zinc-500 mb-4 px-2">Sign in to save generations and get 5 free credits.</p>
                 <button 
-                  onClick={() => handleBuyCredits(5, 50)}
-                  className="flex-1 py-2 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold hover:bg-amber-100 transition-colors border border-amber-100 flex flex-col items-center justify-center p-2"
+                  onClick={handleLogin}
+                  className="w-full py-2.5 bg-zinc-900 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-zinc-800 transition-all text-sm active:scale-95"
                 >
-                  <span className="flex items-center gap-1"><Plus className="w-3 h-3" /> 5 Credits</span>
-                  <span className="text-[10px] opacity-75 mt-0.5">₹50</span>
-                </button>
-                <button 
-                  onClick={() => handleBuyCredits(10, 100)}
-                  className="flex-1 py-2 bg-neutral-50 text-neutral-700 rounded-xl text-xs font-bold hover:bg-neutral-100 transition-colors border border-neutral-200 flex flex-col items-center justify-center p-2 shadow-sm"
-                >
-                  <span className="flex items-center gap-1"><Plus className="w-3 h-3" /> 10 Credits</span>
-                  <span className="text-[10px] opacity-75 mt-0.5">₹100</span>
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-4 h-4 bg-white rounded-full p-0.5" alt="Google" />
+                  Sign in with Google
                 </button>
               </div>
-            </div>
+            )}
 
             {/* History */}
             <div>
@@ -408,13 +398,15 @@ export default function App() {
             </div>
           </div>
 
-          <button 
-            onClick={handleLogout}
-            className="mt-6 flex items-center gap-3 text-zinc-400 hover:text-zinc-900 transition-colors px-2 py-2"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Sign Out</span>
-          </button>
+          {user && (
+            <button 
+              onClick={handleLogout}
+              className="mt-6 flex items-center gap-3 text-zinc-400 hover:text-zinc-900 transition-colors px-2 py-2"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Sign Out</span>
+            </button>
+          )}
         </aside>
 
         {/* Main Content */}

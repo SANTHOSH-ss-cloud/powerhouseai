@@ -1,6 +1,10 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+if (!apiKey) {
+  console.error("VITE_GEMINI_API_KEY is missing from environment variables!");
+}
+const ai = new GoogleGenAI({ apiKey });
 
 export interface SlideContent {
   title: string;
@@ -14,7 +18,7 @@ export interface PptStructure {
 
 export async function generatePptContent(prompt: string): Promise<PptStructure> {
   const response = await ai.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-2.0-flash",
     contents: `You are an expert educational content creator. 
     Input: ${prompt}
     
@@ -59,7 +63,7 @@ export async function generatePptContent(prompt: string): Promise<PptStructure> 
 
 export async function generateDocumentContent(prompt: string, type: 'pdf' | 'word'): Promise<{ title: string; content: string }> {
   const response = await ai.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-2.0-flash",
     contents: `You are an expert academic writer.
     Input: ${prompt}
     
@@ -93,7 +97,7 @@ export async function analyzeVideoOrTranscript(input: string): Promise<string> {
   // If it's a URL, we might need search grounding or just ask the user to provide text if we can't fetch it.
   // But for now, we'll treat the input as a prompt that might contain a link or transcript.
   const response = await ai.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-2.0-flash",
     contents: `Analyze the following input (which might be a video link, transcript, or topic): ${input}. 
     Extract the key educational points and summarize them into a structured format suitable for creating a presentation or document.
     If it's a YouTube link, use your search capabilities to find information about it if possible.`,

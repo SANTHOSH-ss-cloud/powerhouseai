@@ -246,9 +246,9 @@ export default function App() {
       // Update local profile state
       setProfile(prev => prev ? { ...prev, credits: prev.credits - 1 } : null);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Generation failed", error);
-      alert("AI Generation failed. Please try again.");
+      alert("Error: " + (error.message || "Unknown error occurred"));
     } finally {
       setGenerating(false);
     }

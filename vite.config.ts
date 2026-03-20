@@ -13,6 +13,9 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
+      proxy: {
+        '/api': 'http://localhost:3001'
+      },
       headers: {
         'Cross-Origin-Opener-Policy': 'unsafe-none',
       },

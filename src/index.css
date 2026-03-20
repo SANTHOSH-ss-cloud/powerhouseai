@@ -1,12 +1,34 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Manrope", sans-serif;
+  
+  --color-indigo-50: #eef2ff;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-indigo-700: #4338ca;
+  --color-indigo-900: #312e81;
+  
+  --color-teal-50: #f0fdfa;
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  
+  --color-amber-50: #fffbeb;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+}
+
 @layer base {
-  .prose h1 { @apply text-3xl font-bold mb-4 mt-8; }
-  .prose h2 { @apply text-2xl font-bold mb-3 mt-6; }
+  body {
+    @apply font-sans antialiased text-slate-900 bg-slate-50;
+  }
+  .prose h1 { @apply text-3xl font-extrabold mb-4 mt-8 tracking-tight; }
+  .prose h2 { @apply text-2xl font-bold mb-3 mt-6 tracking-tight; }
   .prose h3 { @apply text-xl font-bold mb-2 mt-4; }
-  .prose p { @apply mb-4 text-zinc-600 leading-relaxed; }
+  .prose p { @apply mb-4 text-slate-600 leading-relaxed; }
   .prose ul { @apply list-disc pl-6 mb-4 space-y-2; }
   .prose ol { @apply list-decimal pl-6 mb-4 space-y-2; }
-  .prose li { @apply text-zinc-600; }
-  .prose strong { @apply font-bold text-zinc-900; }
+  .prose li { @apply text-slate-600; }
+  .prose strong { @apply font-bold text-slate-900; }
 }

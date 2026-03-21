@@ -155,14 +155,10 @@ export default function Dashboard() {
 
         <nav className="flex-1 px-4 py-4 space-y-1">
           <p className="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Workspace</p>
-          <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold"><Presentation className="w-5 h-5" /> My Presentations</a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900"><FileText className="w-5 h-5" /> My Documents</a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900"><Layout className="w-5 h-5" /> Templates</a>
+          <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 font-bold"><Presentation className="w-5 h-5" /> My Presentations</Link>
           
           <p className="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-8">Organization</p>
-          <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900"><Users className="w-5 h-5" /> Classrooms</a>
           <Link to="/pricing" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900"><CreditCard className="w-5 h-5" /> Billing & Plan</Link>
-          <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900"><Settings className="w-5 h-5" /> Settings</a>
         </nav>
 
         <div className="p-4 border-t border-slate-200">

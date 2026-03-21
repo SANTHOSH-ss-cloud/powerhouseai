@@ -19,8 +19,13 @@ async function fetchAI(endpoint: string, body: object) {
   });
 
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error || `Failed to fetch from \${endpoint}`);
+    let err;
+    try {
+      err = await response.json();
+    } catch {
+      throw new Error(`Server encountered an error. If your text is extremely large, try shortening it.`);
+    }
+    throw new Error(err.error || `Failed to fetch from ${endpoint}`);
   }
 
   return response.json();

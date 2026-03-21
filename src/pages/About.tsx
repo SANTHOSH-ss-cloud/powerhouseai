@@ -35,22 +35,14 @@ export default function About() {
 
           <div className="text-center mb-16">
             <h2 className="text-3xl font-extrabold tracking-tight mb-12">Meet the Team</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { name: "Sarah Lin", role: "Founder & Product Lead", initials: "SL" },
-                { name: "David Chen", role: "AI Engineer", initials: "DC" },
-                { name: "Dr. A. Roberts", role: "Teacher Advisor", initials: "AR" },
-                { name: "Michael T.", role: "Support Lead", initials: "MT" }
-              ].map((member, i) => (
-                <div key={i} className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col items-center hover:bg-white transition-colors">
-                  <div className="w-16 h-16 bg-indigo-100 text-indigo-700 font-bold text-xl rounded-full flex items-center justify-center mb-4">
-                    {member.initials}
-                  </div>
-                  <h4 className="font-bold text-slate-900">{member.name}</h4>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1 text-center">{member.role}</p>
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col items-center hover:bg-white transition-colors col-span-2 md:col-span-4 max-w-sm mx-auto w-full">
+                <div className="w-20 h-20 bg-indigo-100 text-indigo-700 font-bold text-2xl rounded-full flex items-center justify-center mb-4">
+                  SS
                 </div>
-              ))}
-            </div>
+                <h4 className="font-extrabold text-xl text-slate-900">S.S. Santhosh</h4>
+                <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest mt-1 text-center">Creator & Developer</p>
+                <p className="text-sm text-slate-600 mt-4 text-center">ECE (Electronics and Communication Engineering)</p>
+              </div>
           </div>
           
         </div>

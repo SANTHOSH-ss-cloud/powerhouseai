@@ -14,7 +14,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(process.cwd(), 'dist')));
 
 // Initialize Razorpay
@@ -187,5 +188,11 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
 });
 
+// Global Error Handler for JSON parsing and other middleware errors
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error('Global Error Middleware:', err);
+  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+});
+
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`ClassCraft Backend Running on Port \${PORT}`));
+app.listen(PORT, () => console.log(`ClassCraft Backend Running on Port ${PORT}`));

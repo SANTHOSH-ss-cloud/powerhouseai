@@ -46,14 +46,25 @@ export default function Dashboard() {
         try {
           const docSnap = await getDoc(userDoc);
           if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile);
+            const data = docSnap.data() as UserProfile;
+            const today = new Date().toISOString().split('T')[0];
+            if (data.isSubscribed && data.lastDailyCreditReset !== today) {
+              await updateDoc(userDoc, {
+                credits: increment(5),
+                lastDailyCreditReset: today
+              });
+              data.credits += 5;
+              data.lastDailyCreditReset = today;
+            }
+            setProfile(data);
           } else {
             const newProfile: UserProfile = {
               uid: firebaseUser.uid,
               email: firebaseUser.email || '',
               displayName: firebaseUser.displayName || 'User',
-              credits: 5,
-              createdAt: Timestamp.now()
+              credits: 10, // give 10 free credits initially
+              createdAt: Timestamp.now(),
+              isSubscribed: false
             };
             await setDoc(userDoc, newProfile);
             setProfile(newProfile);

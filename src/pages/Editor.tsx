@@ -47,6 +47,15 @@ export default function Editor() {
   const [preview, setPreview] = useState<{ title: string; content: any } | null>(null);
   const [activeSlide, setActiveSlide] = useState(0);
 
+  const [options, setOptions] = useState({
+    pages: 10,
+    font: 'Arial',
+    size: '16px',
+    images: false,
+    helpNotes: false,
+    detailedContent: false
+  });
+
   // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -77,8 +86,8 @@ export default function Editor() {
     setGenerating(true);
     try {
       let result: any;
-      if (docType === 'ppt') result = await generatePptContent(input);
-      else result = await generateDocumentContent(input, docType);
+      if (docType === 'ppt') result = await generatePptContent(input, options);
+      else result = await generateDocumentContent(input, docType, options);
 
       setPreview({ title: result.title, content: result });
       setActiveSlide(0);
@@ -201,15 +210,33 @@ export default function Editor() {
                   {docType === 'ppt' ? (
                      <div className="w-full h-full p-12 md:p-16 flex flex-col bg-slate-50 overflow-y-auto">
                         <div className="w-16 h-2 bg-indigo-500 rounded-full mb-8 shrink-0"></div>
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-8 tracking-tight leading-tight">{preview.content.slides[activeSlide]?.title}</h2>
-                        <ul className="space-y-4">
+                        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-8 tracking-tight leading-tight" style={{ fontFamily: options.font }}>{preview.content.slides[activeSlide]?.title}</h2>
+                        <ul className="space-y-4 mb-8">
                           {preview.content.slides[activeSlide]?.content.map((pt: string, i: number) => (
-                            <li key={i} className="flex gap-4 items-start text-lg text-slate-700 font-medium">
+                            <li key={i} className="flex gap-4 items-start text-slate-700 font-medium" style={{ fontFamily: options.font, fontSize: options.size }}>
                               <span className="w-2 h-2 rounded-full bg-amber-500 mt-2.5 shrink-0 shadow-sm"></span>
                               <span className="leading-relaxed">{pt}</span>
                             </li>
                           ))}
                         </ul>
+                        {preview.content.slides[activeSlide]?.imagePrompt && (
+                           <div className="mt-4 p-4 bg-teal-50 rounded-xl border border-teal-100 flex items-start gap-3">
+                              <Layout className="w-5 h-5 text-teal-600 mt-0.5" />
+                              <div>
+                                <span className="text-xs font-bold text-teal-800 uppercase tracking-wider block mb-1">Suggested Image</span>
+                                <span className="text-sm text-teal-700">{preview.content.slides[activeSlide].imagePrompt}</span>
+                              </div>
+                           </div>
+                        )}
+                        {preview.content.slides[activeSlide]?.helpNotes && (
+                           <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-start gap-3">
+                              <FileText className="w-5 h-5 text-amber-600 mt-0.5" />
+                              <div>
+                                <span className="text-xs font-bold text-amber-800 uppercase tracking-wider block mb-1">Help / Speaker Notes</span>
+                                <span className="text-sm text-amber-700">{preview.content.slides[activeSlide].helpNotes}</span>
+                              </div>
+                           </div>
+                        )}
                      </div>
                   ) : (
                     <div className="w-full h-full p-12 overflow-y-auto prose prose-slate">
@@ -224,23 +251,83 @@ export default function Editor() {
         </main>
 
         {/* Right Properties Panel */}
-        <aside className="w-72 bg-white border-l border-slate-200 p-6 overflow-y-auto flex flex-col shadow-[-4px_0_24px_-4px_rgba(0,0,0,0.05)] z-10">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">AI Adjustments</h3>
-          
-          <div className="space-y-4 mb-8">
-            <button className="w-full p-3 flex flex-col items-start gap-1 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors text-left text-indigo-900 group">
-              <span className="font-bold flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Simplify for Grade 5</span>
-              <span className="text-xs text-indigo-600/80 font-medium">Rewrite active slide tone.</span>
-            </button>
-            <button className="w-full p-3 flex flex-col items-start gap-1 bg-amber-50 border border-amber-100 rounded-xl hover:bg-amber-100 transition-colors text-left text-amber-900 group">
-              <span className="font-bold flex items-center gap-2"><RefreshCw className="w-4 h-4 text-amber-600" /> Expand Details</span>
-              <span className="text-xs text-amber-600/80 font-medium">Add more bullet points.</span>
-            </button>
-            <button className="w-full p-3 flex flex-col items-start gap-1 bg-teal-50 border border-teal-100 rounded-xl hover:bg-teal-100 transition-colors text-left text-teal-900 group">
-              <span className="font-bold flex items-center gap-2"><FileText className="w-4 h-4 text-teal-600" /> Add Quiz Slide</span>
-              <span className="text-xs text-teal-600/80 font-medium">Generate pop-quiz questions.</span>
-            </button>
-          </div>
+        <aside className="w-72 bg-white border-l border-slate-200 p-6 overflow-y-auto flex flex-col shadow-[-4px_0_24px_-4px_rgba(0,0,0,0.05)] z-10 shrink-0">
+          {!preview ? (
+            <>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">Generation Settings</h3>
+              <div className="space-y-5 mb-8">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">Number of Pages/Slides</label>
+                  <input type="number" min="1" max="50" value={options.pages} onChange={e => setOptions({...options, pages: Number(e.target.value)})} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm bg-slate-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">Font Style</label>
+                  <select value={options.font} onChange={e => setOptions({...options, font: e.target.value})} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm bg-slate-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all cursor-pointer">
+                    <option value="Inter, sans-serif">Modern (Inter)</option>
+                    <option value="Georgia, serif">Academic (Georgia)</option>
+                    <option value="'Comic Sans MS', cursive">Playful (Comic Sans)</option>
+                    <option value="monospace">Code (Monospace)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">Font Size</label>
+                  <select value={options.size} onChange={e => setOptions({...options, size: e.target.value})} className="w-full border border-slate-200 rounded-lg p-2.5 text-sm bg-slate-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all cursor-pointer">
+                    <option value="14px">Small (14px)</option>
+                    <option value="18px">Medium (18px)</option>
+                    <option value="22px">Large (22px)</option>
+                    <option value="28px">Extra Large (28px)</option>
+                  </select>
+                </div>
+                
+                <div className="pt-2 border-t border-slate-100 space-y-3">
+                  {docType === 'ppt' && (
+                    <>
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className="relative flex items-center">
+                          <input type="checkbox" checked={options.images} onChange={e => setOptions({...options, images: e.target.checked})} className="peer sr-only" />
+                          <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </div>
+                        <span className="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">Suggest Images</span>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className="relative flex items-center">
+                          <input type="checkbox" checked={options.helpNotes} onChange={e => setOptions({...options, helpNotes: e.target.checked})} className="peer sr-only" />
+                          <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </div>
+                        <span className="text-sm font-bold text-slate-700 group-hover:text-amber-600 transition-colors">Generate Help Notes</span>
+                      </label>
+                    </>
+                  )}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative flex items-center">
+                      <input type="checkbox" checked={options.detailedContent} onChange={e => setOptions({...options, detailedContent: e.target.checked})} className="peer sr-only" />
+                      <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </div>
+                    <span className="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">Detailed Explanations</span>
+                  </label>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">AI Adjustments</h3>
+              
+              <div className="space-y-4 mb-8">
+                <button className="w-full p-3 flex flex-col items-start gap-1 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors text-left text-indigo-900 group">
+                  <span className="font-bold flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Simplify for Grade 5</span>
+                  <span className="text-xs text-indigo-600/80 font-medium">Rewrite active slide tone.</span>
+                </button>
+                <button className="w-full p-3 flex flex-col items-start gap-1 bg-amber-50 border border-amber-100 rounded-xl hover:bg-amber-100 transition-colors text-left text-amber-900 group">
+                  <span className="font-bold flex items-center gap-2"><RefreshCw className="w-4 h-4 text-amber-600" /> Expand Details</span>
+                  <span className="text-xs text-amber-600/80 font-medium">Add more bullet points.</span>
+                </button>
+                <button className="w-full p-3 flex flex-col items-start gap-1 bg-teal-50 border border-teal-100 rounded-xl hover:bg-teal-100 transition-colors text-left text-teal-900 group">
+                  <span className="font-bold flex items-center gap-2"><FileText className="w-4 h-4 text-teal-600" /> Add Quiz Slide</span>
+                  <span className="text-xs text-teal-600/80 font-medium">Generate pop-quiz questions.</span>
+                </button>
+              </div>
+            </>
+          )}
 
           <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">Quick Export</h3>
           <div className="space-y-3">

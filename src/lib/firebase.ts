@@ -75,6 +75,9 @@ export interface UserProfile {
   displayName: string;
   credits: number;
   createdAt: Timestamp;
+  isSubscribed?: boolean;
+  planType?: 'free' | 'monthly_pro';
+  lastDailyCreditReset?: string;
 }
 
 export interface GenerationRecord {

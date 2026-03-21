@@ -32,15 +32,28 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 app.post('/api/generate-ppt', async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const { prompt, options } = req.body;
     if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
+
+    const { pages = 10, font = 'Arial', size = '16px', images = false, helpNotes = false, detailedContent = false } = options || {};
+
+    let extraInstructions = `
+    - Number of slides (pages): Exactly ${pages}.
+    - Theme/Font suggestion: ${font}, Size suggestion: ${size}. Incorporate these as metadata if possible.
+    ${images ? '- Suggest images for each slide.' : ''}
+    ${helpNotes ? '- Include speaker/help notes for each slide.' : ''}
+    ${detailedContent ? '- Provide detailed paragraph explanations instead of just bullet points.' : ''}
+    `;
 
     const result = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: `You are ClassCraft AI, an expert educational content creator.
-      Analyze this input: \${prompt}
+      Analyze this input: ${prompt}
       Generate a structured educational presentation.
-      Return in JSON format with 'title' and 'slides' array.`,
+      Follow these constraints: ${extraInstructions}
+      Return in JSON format with 'title' and 'slides' array.
+      If options specify images, set an 'imagePrompt' field in each slide.
+      If options specify helpNotes, set a 'helpNotes' field in each slide.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -53,7 +66,9 @@ app.post('/api/generate-ppt', async (req, res) => {
                 type: Type.OBJECT,
                 properties: {
                   title: { type: Type.STRING },
-                  content: { type: Type.ARRAY, items: { type: Type.STRING } }
+                  content: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  imagePrompt: { type: Type.STRING },
+                  helpNotes: { type: Type.STRING }
                 },
                 required: ["title", "content"]
               }
@@ -74,13 +89,22 @@ app.post('/api/generate-ppt', async (req, res) => {
 
 app.post('/api/generate-doc', async (req, res) => {
   try {
-    const { prompt, type } = req.body;
+    const { prompt, type, options } = req.body;
     if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
+
+    const { pages = 5, font = 'Arial', size = '12px', images = false } = options || {};
+
+    let extraInstructions = `
+    - Target length (pages): Around ${pages} pages worth of content.
+    - Theme suggestion: Font ${font}, Size ${size}.
+    ${images ? '- Suggest locations for images within the markdown.' : ''}
+    `;
 
     const result = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: `You are ClassCraft AI, an expert academic writer.
-      Generate a comprehensive \${type} document based on: \${prompt}.
+      Generate a comprehensive ${type} document based on: ${prompt}.
+      Follow constraints: ${extraInstructions}
       Use professional markdown layout.
       Return in JSON format with 'title' and 'content' (markdown).`,
       config: {
@@ -107,6 +131,26 @@ app.post('/api/generate-doc', async (req, res) => {
 /* -------------------------------------------------------------------------- */
 /*                                RAZORPAY API                                  */
 /* -------------------------------------------------------------------------- */
+
+app.post('/api/create-subscription', async (req, res) => {
+  try {
+    const { planId } = req.body;
+    // Without a real planId, fallback to a mocked recurring checkout link
+    if (!planId) {
+      return res.json({ id: `sub_mock_${Date.now()}`, mock: true });
+    }
+    const options = {
+      plan_id: planId,
+      customer_notify: 1 as 1,
+      total_count: 12,
+      start_at: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // 30 day trial
+    };
+    const subscription = await razorpay.subscriptions.create(options);
+    res.json(subscription);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.post('/api/create-order', async (req, res) => {
   try {

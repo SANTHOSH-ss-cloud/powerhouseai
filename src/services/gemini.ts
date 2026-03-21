@@ -1,6 +1,8 @@
 export interface SlideContent {
   title: string;
   content: string[];
+  imagePrompt?: string;
+  helpNotes?: string;
 }
 
 export interface PptStructure {
@@ -27,15 +29,15 @@ async function fetchAI(endpoint: string, body: object) {
 /**
  * Generates PPT structure by calling the backend /api/generate-ppt endpoint.
  */
-export async function generatePptContent(prompt: string): Promise<PptStructure> {
-  return await fetchAI('generate-ppt', { prompt });
+export async function generatePptContent(prompt: string, options?: any): Promise<PptStructure> {
+  return await fetchAI('generate-ppt', { prompt, options });
 }
 
 /**
  * Generates Doc/PDF content by calling the backend /api/generate-doc endpoint.
  */
-export async function generateDocumentContent(prompt: string, type: 'pdf' | 'word'): Promise<{ title: string; content: string }> {
-  return await fetchAI('generate-doc', { prompt, type });
+export async function generateDocumentContent(prompt: string, type: 'pdf' | 'word', options?: any): Promise<{ title: string; content: string }> {
+  return await fetchAI('generate-doc', { prompt, type, options });
 }
 
 /**

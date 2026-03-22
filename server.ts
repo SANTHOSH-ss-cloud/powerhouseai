@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from "@google/genai";
 
 dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,13 +20,22 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(process.cwd(), 'dist')));
 
 // Initialize Razorpay
+const RAZORPAY_KEY = process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET;
+if (!RAZORPAY_KEY || RAZORPAY_KEY === 'dummy_key') {
+  console.warn("WARNING: RAZORPAY_KEY_ID is missing or dummy. Payment features will not work.");
+}
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
+  key_id: RAZORPAY_KEY || 'dummy_key',
+  key_secret: RAZORPAY_SECRET || 'dummy_secret',
 });
 
 // Initialize Gemini AI
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'dummy_api_key' });
+const GEMINI_KEY = process.env.GEMINI_API_KEY;
+if (!GEMINI_KEY || GEMINI_KEY === 'dummy_api_key') {
+  console.warn("WARNING: GEMINI_API_KEY is missing or set to 'dummy_api_key'. AI generation will fail.");
+}
+const ai = new GoogleGenAI({ apiKey: GEMINI_KEY || 'dummy_api_key' });
 
 /* -------------------------------------------------------------------------- */
 /*                               AI GENERATION API                            */
@@ -47,7 +57,7 @@ app.post('/api/generate-ppt', async (req, res) => {
     `;
 
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       contents: `You are ClassCraft AI, an expert educational content creator.
       Analyze this input: ${prompt}
       Generate a structured educational presentation.
@@ -102,7 +112,7 @@ app.post('/api/generate-doc', async (req, res) => {
     `;
 
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       contents: `You are ClassCraft AI, an expert academic writer.
       Generate a comprehensive ${type} document based on: ${prompt}.
       Follow constraints: ${extraInstructions}

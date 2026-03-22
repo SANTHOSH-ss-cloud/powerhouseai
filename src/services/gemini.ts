@@ -23,9 +23,13 @@ async function fetchAI(endpoint: string, body: object) {
     try {
       err = await response.json();
     } catch {
-      throw new Error(`Server encountered an error. If your text is extremely large, try shortening it.`);
+      throw new Error(`Server encountered an error (HTTP \${response.status}). This often happens if the API key is missing or the input is too large.`);
     }
-    throw new Error(err.error || `Failed to fetch from ${endpoint}`);
+    const message = err.error || `Failed to fetch from \${endpoint}`;
+    if (message.includes('dummy_api_key') || message.includes('API key not valid')) {
+      throw new Error("Gemini AI API Key is missing or invalid in the backend. Please check your .env configuration.");
+    }
+    throw new Error(message);
   }
 
   return response.json();
